@@ -13,13 +13,25 @@ import (
 func main() {
 	dir, _ := os.Getwd()
 
+	// var baseDir string
+	// var err error
+
+	// baseDir, err = os.UserHomeDir()
+
 	processDirectory(dir)
+}
+
+func setBaseDirectory() (string, error) {
+	a, err := os.UserHomeDir()
+	return a, err
 }
 
 func _decompressEpubFile(filePath string, file os.DirEntry) {
 
 	fmt.Println("Path:", filePath)
 	fmt.Println("File:", file.Name())
+
+	BASEDIR, err := setBaseDirectory()
 
 	zipReader, err := zip.OpenReader(filePath)
 
@@ -30,16 +42,17 @@ func _decompressEpubFile(filePath string, file os.DirEntry) {
 
 	for _, subFile := range zipReader.File {
 		fmt.Println("Extracted", subFile.Name)
-		dir, _ := strings.CutSuffix(filePath, ".epub")
+		dir, _ := strings.CutSuffix(file.Name(), ".epub")
+		dir = strings.Join([]string{BASEDIR, "eBookReader", dir}, string(os.PathSeparator))
 
 		saveExtractedFile(dir, subFile)
 		fmt.Println(subFile.FileHeader)
 	}
 }
 
-func saveExtractedFile(directory string, file *zip.File) error {
+func saveExtractedFile(baseDirectory string, file *zip.File) error {
 	var fileName string = file.Name
-	var finalPath = filepath.Join(directory, fileName)
+	var finalPath = filepath.Join(baseDirectory, fileName)
 	fmt.Println(finalPath)
 
 	if file.FileInfo().IsDir() {
@@ -79,10 +92,10 @@ func saveExtractedFile(directory string, file *zip.File) error {
 	return nil
 }
 
-func decompressEpubFile(path string, d os.DirEntry, err error) error {
+func decompressEpubFile(filePath string, d os.DirEntry, err error) error {
 
 	if strings.HasSuffix(d.Name(), ".epub") {
-		_decompressEpubFile(path, d)
+		_decompressEpubFile(filePath, d)
 	}
 
 	return nil
