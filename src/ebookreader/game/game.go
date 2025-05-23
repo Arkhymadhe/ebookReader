@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"bufio"
@@ -32,7 +32,7 @@ import (
 // 	fmt.Println("You have exhausted your trials. Come back later 😭!")
 // }
 
-func generateGroundTruthNum(low int, high int) int {
+func GenerateGroundTruthNum(low int, high int) int {
 	var randNum int = rand.Intn(high) + 1
 
 	if randNum < low {
@@ -41,7 +41,7 @@ func generateGroundTruthNum(low int, high int) int {
 	return randNum
 }
 
-func guessNum(low int, high int) int {
+func GuessNum(low int, high int) int {
 	var err error
 	reader := bufio.NewReader(os.Stdin)
 

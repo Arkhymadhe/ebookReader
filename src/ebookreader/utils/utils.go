@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"archive/zip"
@@ -10,28 +10,20 @@ import (
 	"strings"
 )
 
-func main() {
-	dir, _ := os.Getwd()
-
-	// var baseDir string
-	// var err error
-
-	// baseDir, err = os.UserHomeDir()
-
-	processDirectory(dir)
-}
-
-func setBaseDirectory() (string, error) {
+// setBaseDirectory sets the base directory for the application.
+// This is the directory at which extracted information is stored.
+func SetBaseDirectory() (string, error) {
 	a, err := os.UserHomeDir()
 	return a, err
 }
 
-func _decompressEpubFile(filePath string, file os.DirEntry) {
+// _decompressEpubFile decompresses the .ePub file and stores the contents appropriately.
+func _DecompressEpubFile(filePath string, file os.DirEntry) {
 
 	fmt.Println("Path:", filePath)
 	fmt.Println("File:", file.Name())
 
-	BASEDIR, err := setBaseDirectory()
+	BASEDIR, _ := SetBaseDirectory()
 
 	zipReader, err := zip.OpenReader(filePath)
 
@@ -45,12 +37,13 @@ func _decompressEpubFile(filePath string, file os.DirEntry) {
 		dir, _ := strings.CutSuffix(file.Name(), ".epub")
 		dir = strings.Join([]string{BASEDIR, "eBookReader", dir}, string(os.PathSeparator))
 
-		saveExtractedFile(dir, subFile)
+		SaveExtractedFile(dir, subFile)
 		fmt.Println(subFile.FileHeader)
 	}
 }
 
-func saveExtractedFile(baseDirectory string, file *zip.File) error {
+// SaveExtractedFile saves the files extracted from the .ePub file in the correct directories.
+func SaveExtractedFile(baseDirectory string, file *zip.File) error {
 	var fileName string = file.Name
 	var finalPath = filepath.Join(baseDirectory, fileName)
 	fmt.Println(finalPath)
@@ -59,12 +52,19 @@ func saveExtractedFile(baseDirectory string, file *zip.File) error {
 		os.MkdirAll(finalPath, os.FileMode(os.O_CREATE))
 		return nil
 	} else {
-		var pathParts []string = strings.Split(finalPath, string(os.PathSeparator))
-		pathParts = pathParts[:len(pathParts)-1]
+		_, err := os.Open(finalPath)
 
-		var newDir = strings.Join(pathParts, string(os.PathSeparator))
+		if !os.IsExist(err) {
+			var pathParts []string = strings.Split(finalPath, string(os.PathSeparator))
+			pathParts = pathParts[:len(pathParts)-1]
 
-		os.MkdirAll(newDir, os.FileMode(os.O_CREATE))
+			var newDir = strings.Join(pathParts, string(os.PathSeparator))
+
+			os.MkdirAll(newDir, os.FileMode(os.O_CREATE))
+		} else {
+			log.Println("File found in path!")
+			return nil
+		}
 	}
 
 	src, err := file.Open()
@@ -92,16 +92,18 @@ func saveExtractedFile(baseDirectory string, file *zip.File) error {
 	return nil
 }
 
-func decompressEpubFile(filePath string, d os.DirEntry, err error) error {
+// decompressEpubFile decompresses the .ePub file and stores the contents appropriately.
+// To be used with os directory walking process.
+func DecompressEpubFile(filePath string, d os.DirEntry, err error) error {
 
 	if strings.HasSuffix(d.Name(), ".epub") {
-		_decompressEpubFile(filePath, d)
+		_DecompressEpubFile(filePath, d)
 	}
 
 	return nil
 }
 
-func processDirectory(directory string) error {
+func ProcessDirectory(directory string) error {
 	fmt.Println("Walking dir `", directory, "` ...")
-	return filepath.WalkDir(directory, decompressEpubFile)
+	return filepath.WalkDir(directory, DecompressEpubFile)
 }
