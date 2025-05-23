@@ -1,4 +1,4 @@
-package main
+package timeline
 
 import (
 	"bufio"
@@ -17,13 +17,13 @@ import (
 // 	fmt.Println("The value is", x)
 // }
 
-func displayTime() {
+func DisplayTime() {
 	var timeNow time.Time = time.Now()
 	fmt.Println(timeNow)
 	// fmt.Println("The time right now is:\n", breakDownTime(timeNow))
 }
 
-func floorAndCeil(x float64) (xFloored float64, xCeil float64) {
+func FloorAndCeil(x float64) (xFloored float64, xCeil float64) {
 	xCeil = math.Ceil(x)
 	xFloored = math.Floor(x)
 
@@ -33,7 +33,7 @@ func floorAndCeil(x float64) (xFloored float64, xCeil float64) {
 	return
 }
 
-func breakDownTime(x time.Time) (x_ int) {
+func BreakDownTime(x time.Time) (x_ int) {
 	// var year int = x.Year()
 	// var month int = x.Month()
 	// var day int = x.Day()
@@ -48,7 +48,7 @@ func breakDownTime(x time.Time) (x_ int) {
 	return x_
 }
 
-func getUserInput() float64 {
+func GetUserInput() float64 {
 	reader := bufio.NewReader(os.Stdin)
 
 	input, err1 := reader.ReadString('\n')
